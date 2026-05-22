@@ -1,0 +1,10 @@
+[package]
+name = "mirage-telemetry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+mirage-core = { path = "../mirage-core" }
+serde.workspace = true
+bincode.workspace = true
