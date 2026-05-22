@@ -55,15 +55,16 @@ pub fn validate(t: &TokenTrace) -> Result<(), TraceError> {
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
+pub mod frame;
+
+#[doc(hidden)]
+pub mod tests_support {
     use super::*;
     use mirage_core::control::DifficultyClass;
-
-    fn sample() -> TokenTrace {
+    pub fn sample_trace(token_id: u32) -> TokenTrace {
         TokenTrace {
             schema_version: SCHEMA_VERSION, model_id: 7, run_id: 1,
-            token_id: 10, position: 3, chain_phase: ChainPhase::Early,
+            token_id, position: token_id, chain_phase: ChainPhase::Early,
             predicted_experts: vec![1, 2], actual_experts: vec![1, 2],
             precision_plan: vec![PrecisionTier::Q4],
             profiler_decision: ComputeDecision {
@@ -77,6 +78,15 @@ mod tests {
             energy_mj: 50, logits_entropy: 0.4, logit_margin: 1.2,
             fallback_level: 0, deterministic: true,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample() -> TokenTrace {
+        tests_support::sample_trace(10)
     }
 
     #[test]
