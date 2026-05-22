@@ -2,3 +2,4 @@
 //! Mirage shared types and traits. GPU-free.
 
 pub mod control;
+pub mod plan;
