@@ -3,3 +3,4 @@
 //! aggregation, and the reasoning-retention CI gate.
 
 pub mod task;
+pub mod tasks;
