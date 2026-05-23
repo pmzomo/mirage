@@ -13,3 +13,7 @@ mirage-sim = { path = "../mirage-sim" }
 mirage-telemetry = { path = "../mirage-telemetry" }
 serde.workspace = true
 serde_json.workspace = true
+
+[[bin]]
+name = "reasoning-gate"
+path = "src/bin/reasoning_gate.rs"

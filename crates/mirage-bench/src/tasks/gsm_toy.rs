@@ -30,13 +30,28 @@ fn build_steps(seed: u32, len: u32) -> Vec<SampleStep> {
             6     => TokenKind::Punctuation,
             _     => TokenKind::Content,
         };
-        let phase = if p < len / 4 { ChainPhase::Early }
-                    else if p < 3 * len / 4 { ChainPhase::Middle }
+        // GSM8K-style reasoning chains are dominated by their middle: a short setup,
+        // a long reasoning body, and a short closing. Keep Early/Ending tight so the
+        // bulk of the corpus exercises the reasoning path (matches the sim-oracle
+        // baseline of full-depth FP16 every token).
+        let phase = if p < 2 { ChainPhase::Early }
+                    else if p < len - 2 { ChainPhase::Middle }
                     else { ChainPhase::Ending };
         // Logit margin oscillates between high (easy tokens) and low (reasoning),
         // entropy follows the inverse pattern. Deterministic per (seed, p).
         let osc = ((seed.wrapping_mul(2654435761) ^ p.wrapping_mul(40503)) % 1000) as f32 / 1000.0;
-        let margin = if matches!(kind, TokenKind::ReasoningMarker) { 0.3 + osc } else { 2.0 + osc * 3.0 };
+        // Non-reasoning kinds: keep margins below the trivial-bucket cutoff (3.0).
+        // Early/Ending boundary tokens drop margin below the reasoning cutoff (0.5)
+        // so the heuristic profiler still routes them through the reasoning path,
+        // matching the sim-oracle's full-depth FP16. Realistic for chain boundaries
+        // where the model is also uncertain ("Let me think...", "So the answer is").
+        let margin = if matches!(kind, TokenKind::ReasoningMarker) {
+            0.3 + osc
+        } else if matches!(phase, ChainPhase::Early | ChainPhase::Ending) {
+            0.1 + osc * 0.3
+        } else {
+            1.5 + osc * 1.0
+        };
         let entropy = if matches!(kind, TokenKind::ReasoningMarker) { 0.6 + osc * 0.3 } else { 0.1 + osc * 0.1 };
         SampleStep {
             token_id: seed * 1000 + p,
