@@ -6,10 +6,17 @@ use mirage_core::decision::ActualRouting;
 use mirage_core::traits::BranchPredictor;
 use mirage_telemetry::TokenTrace;
 
-pub struct ReplayResult { pub tokens: usize, pub hits: usize }
+pub struct ReplayResult {
+    pub tokens: usize,
+    pub hits: usize,
+}
 impl ReplayResult {
     pub fn hit_rate(&self) -> f64 {
-        if self.tokens == 0 { 0.0 } else { self.hits as f64 / self.tokens as f64 }
+        if self.tokens == 0 {
+            0.0
+        } else {
+            self.hits as f64 / self.tokens as f64
+        }
     }
 }
 
@@ -23,15 +30,27 @@ pub fn replay<B: BranchPredictor>(traces: &[TokenTrace], pred: &mut B) -> Replay
             recent_experts: t.predicted_experts.clone(),
         };
         let predicted = pred.predict(&rctx);
-        let flat: Vec<u16> =
-            predicted.experts_per_moe_layer.iter().flatten().copied().collect();
-        if flat == t.actual_experts { hits += 1; }
-        pred.update(&predicted, &ActualRouting {
-            experts_per_moe_layer: vec![t.actual_experts.clone()],
-            exit_layer: 0,
-        });
+        let flat: Vec<u16> = predicted
+            .experts_per_moe_layer
+            .iter()
+            .flatten()
+            .copied()
+            .collect();
+        if flat == t.actual_experts {
+            hits += 1;
+        }
+        pred.update(
+            &predicted,
+            &ActualRouting {
+                experts_per_moe_layer: vec![t.actual_experts.clone()],
+                exit_layer: 0,
+            },
+        );
     }
-    ReplayResult { tokens: traces.len(), hits }
+    ReplayResult {
+        tokens: traces.len(),
+        hits,
+    }
 }
 
 #[cfg(test)]

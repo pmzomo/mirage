@@ -40,15 +40,21 @@ pub struct TokenTrace {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum TraceError { WrongSchema(u16), LatencyInconsistent }
+pub enum TraceError {
+    WrongSchema(u16),
+    LatencyInconsistent,
+}
 
 /// Invariant I8: a trace must validate against its declared schema version.
 pub fn validate(t: &TokenTrace) -> Result<(), TraceError> {
     if t.schema_version != SCHEMA_VERSION {
         return Err(TraceError::WrongSchema(t.schema_version));
     }
-    let parts = t.latency.prefetch_us + t.latency.compute_us
-        + t.latency.stall_us + t.latency.cpu_us + t.latency.sample_us;
+    let parts = t.latency.prefetch_us
+        + t.latency.compute_us
+        + t.latency.stall_us
+        + t.latency.cpu_us
+        + t.latency.sample_us;
     if parts > t.latency.total_us {
         return Err(TraceError::LatencyInconsistent);
     }
@@ -63,20 +69,39 @@ pub mod tests_support {
     use mirage_core::control::DifficultyClass;
     pub fn sample_trace(token_id: u32) -> TokenTrace {
         TokenTrace {
-            schema_version: SCHEMA_VERSION, model_id: 7, run_id: 1,
-            token_id, position: token_id, chain_phase: ChainPhase::Early,
-            predicted_experts: vec![1, 2], actual_experts: vec![1, 2],
+            schema_version: SCHEMA_VERSION,
+            model_id: 7,
+            run_id: 1,
+            token_id,
+            position: token_id,
+            chain_phase: ChainPhase::Early,
+            predicted_experts: vec![1, 2],
+            actual_experts: vec![1, 2],
             precision_plan: vec![PrecisionTier::Q4],
             profiler_decision: ComputeDecision {
-                difficulty: DifficultyClass::Normal, target_depth: 48,
-                precision_per_group: vec![PrecisionTier::Q4], head_budget: 32,
-                burst: false, chain_phase: ChainPhase::Early,
+                difficulty: DifficultyClass::Normal,
+                target_depth: 48,
+                precision_per_group: vec![PrecisionTier::Q4],
+                head_budget: 32,
+                burst: false,
+                chain_phase: ChainPhase::Early,
             },
-            latency: LatencyBreakdown { total_us: 100, prefetch_us: 10,
-                compute_us: 70, stall_us: 5, cpu_us: 5, sample_us: 2 },
-            vram_usage_mb: 11000, pcie_bytes: 1024, kv_cache_bytes: 2048,
-            energy_mj: 50, logits_entropy: 0.4, logit_margin: 1.2,
-            fallback_level: 0, deterministic: true,
+            latency: LatencyBreakdown {
+                total_us: 100,
+                prefetch_us: 10,
+                compute_us: 70,
+                stall_us: 5,
+                cpu_us: 5,
+                sample_us: 2,
+            },
+            vram_usage_mb: 11000,
+            pcie_bytes: 1024,
+            kv_cache_bytes: 2048,
+            energy_mj: 50,
+            logits_entropy: 0.4,
+            logit_margin: 1.2,
+            fallback_level: 0,
+            deterministic: true,
         }
     }
 }
@@ -90,17 +115,21 @@ mod tests {
     }
 
     #[test]
-    fn valid_trace_passes() { assert!(validate(&sample()).is_ok()); }
+    fn valid_trace_passes() {
+        assert!(validate(&sample()).is_ok());
+    }
 
     #[test]
     fn wrong_schema_rejected() {
-        let mut t = sample(); t.schema_version = 99;
+        let mut t = sample();
+        t.schema_version = 99;
         assert_eq!(validate(&t), Err(TraceError::WrongSchema(99)));
     }
 
     #[test]
     fn inconsistent_latency_rejected() {
-        let mut t = sample(); t.latency.compute_us = 10_000;
+        let mut t = sample();
+        t.latency.compute_us = 10_000;
         assert_eq!(validate(&t), Err(TraceError::LatencyInconsistent));
     }
 }

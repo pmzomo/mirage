@@ -39,8 +39,11 @@ mod tests {
     fn trait_object_is_usable() {
         let p: Box<dyn CognitiveProfiler> = Box::new(NullProfiler);
         let ctx = TokenContext {
-            token_id: 1, position: 0, recent_logit_margin: 1.0,
-            recent_entropy: 0.1, token_kind: TokenKind::Content,
+            token_id: 1,
+            position: 0,
+            recent_logit_margin: 1.0,
+            recent_entropy: 0.1,
+            token_kind: TokenKind::Content,
             chain_phase: ChainPhase::NotReasoning,
         };
         assert_eq!(p.predict(&ctx).target_depth, 1);

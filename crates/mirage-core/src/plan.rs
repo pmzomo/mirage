@@ -40,9 +40,18 @@ pub struct ModelShape {
 impl ModelShape {
     /// Synthetic shape approximating Qwen3-30B-A3B (MoE).
     pub fn qwen3_30b_a3b() -> Self {
-        ModelShape { n_layers: 48, n_heads: 32, n_experts: 128, top_k: 8, hidden: 2048, vocab: 151_936 }
+        ModelShape {
+            n_layers: 48,
+            n_heads: 32,
+            n_experts: 128,
+            top_k: 8,
+            hidden: 2048,
+            vocab: 151_936,
+        }
     }
-    pub fn is_moe(&self) -> bool { self.n_experts > 0 }
+    pub fn is_moe(&self) -> bool {
+        self.n_experts > 0
+    }
 }
 
 #[cfg(test)]

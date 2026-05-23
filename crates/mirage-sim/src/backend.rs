@@ -6,10 +6,16 @@ use mirage_core::decision::ActualRouting;
 use mirage_core::plan::{ExecPlan, ExpertBinding, ModelShape};
 use mirage_core::traits::ExecutionBackend;
 
-pub struct SimBackend { vram: FakeVram }
+pub struct SimBackend {
+    vram: FakeVram,
+}
 
 impl SimBackend {
-    pub fn new(budget_mb: u32) -> Self { SimBackend { vram: FakeVram::new(budget_mb) } }
+    pub fn new(budget_mb: u32) -> Self {
+        SimBackend {
+            vram: FakeVram::new(budget_mb),
+        }
+    }
 }
 
 impl ExecutionBackend for SimBackend {
@@ -40,10 +46,14 @@ impl ExecutionBackend for SimBackend {
                 exit_layer: executed,
             },
             telemetry: ExecTelemetry {
-                prefetch_us: prefetch, compute_us: compute, stall_us: stall,
-                cpu_us: 0, vram_mb: self.vram.used_mb(),
+                prefetch_us: prefetch,
+                compute_us: compute,
+                stall_us: stall,
+                cpu_us: 0,
+                vram_mb: self.vram.used_mb(),
                 pcie_bytes: total_misses as u64 * crate::hw::EXPERT_BYTES,
-                kv_bytes: 0, energy_mj: (compute + stall) / 10,
+                kv_bytes: 0,
+                energy_mj: (compute + stall) / 10,
             },
         }
     }
@@ -56,12 +66,22 @@ mod tests {
     use mirage_core::plan::LayerOp;
 
     fn plan_for(position: u32, layers: u16) -> ExecPlan {
-        let ops = (0..layers).map(|l| LayerOp {
-            layer_idx: l, precision: PrecisionTier::Q4,
-            head_mask: HeadMask::all(32), experts: ExpertBinding::Resident(vec![]),
-            device: Device::Gpu,
-        }).collect();
-        ExecPlan { token_id: position, position, ops, exit_after: layers, fallback_level: 0 }
+        let ops = (0..layers)
+            .map(|l| LayerOp {
+                layer_idx: l,
+                precision: PrecisionTier::Q4,
+                head_mask: HeadMask::all(32),
+                experts: ExpertBinding::Resident(vec![]),
+                device: Device::Gpu,
+            })
+            .collect();
+        ExecPlan {
+            token_id: position,
+            position,
+            ops,
+            exit_after: layers,
+            fallback_level: 0,
+        }
     }
 
     #[test]
@@ -79,6 +99,9 @@ mod tests {
         let s = ModelShape::qwen3_30b_a3b();
         let mut b1 = SimBackend::new(12_000);
         let mut b2 = SimBackend::new(12_000);
-        assert_eq!(b1.execute(&plan_for(50, 8), &s), b2.execute(&plan_for(50, 8), &s));
+        assert_eq!(
+            b1.execute(&plan_for(50, 8), &s),
+            b2.execute(&plan_for(50, 8), &s)
+        );
     }
 }
