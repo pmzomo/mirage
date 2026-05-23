@@ -22,7 +22,9 @@ pub struct BenchReport {
 }
 
 fn percentile(sorted: &[u32], p: f64) -> u32 {
-    if sorted.is_empty() { return 0; }
+    if sorted.is_empty() {
+        return 0;
+    }
     let idx = ((sorted.len() as f64 - 1.0) * p).round() as usize;
     sorted[idx.min(sorted.len() - 1)]
 }
@@ -37,14 +39,19 @@ impl BenchReport {
         let tokens = traces.len();
         let sim_us_total: u64 = traces.iter().map(|t| t.latency.total_us as u64).sum();
         let stall_us_total: u64 = traces.iter().map(|t| t.latency.stall_us as u64).sum();
-        let sim_tok_per_s = if sim_us_total == 0 { 0.0 }
-                            else { tokens as f64 * 1_000_000.0 / sim_us_total as f64 };
+        let sim_tok_per_s = if sim_us_total == 0 {
+            0.0
+        } else {
+            tokens as f64 * 1_000_000.0 / sim_us_total as f64
+        };
         let mut totals: Vec<u32> = traces.iter().map(|t| t.latency.total_us).collect();
         totals.sort_unstable();
         let peak_vram_mb = traces.iter().map(|t| t.vram_usage_mb).max().unwrap_or(0);
-        let mean_vram_mb = if tokens == 0 { 0.0 }
-                           else { traces.iter().map(|t| t.vram_usage_mb as f64).sum::<f64>()
-                                  / tokens as f64 };
+        let mean_vram_mb = if tokens == 0 {
+            0.0
+        } else {
+            traces.iter().map(|t| t.vram_usage_mb as f64).sum::<f64>() / tokens as f64
+        };
         let fallback_level_max = traces.iter().map(|t| t.fallback_level).max().unwrap_or(0);
 
         BenchReport {
@@ -55,8 +62,11 @@ impl BenchReport {
             sim_tok_per_s,
             p50_total_us: percentile(&totals, 0.50),
             p99_total_us: percentile(&totals, 0.99),
-            stall_fraction: if sim_us_total == 0 { 0.0 }
-                            else { stall_us_total as f64 / sim_us_total as f64 },
+            stall_fraction: if sim_us_total == 0 {
+                0.0
+            } else {
+                stall_us_total as f64 / sim_us_total as f64
+            },
             mean_vram_mb,
             peak_vram_mb,
             fallback_level_max,

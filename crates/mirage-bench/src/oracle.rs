@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 use mirage_core::context::{RoutingContext, TokenContext};
-use mirage_core::control::{ChainPhase, DifficultyClass, PrecisionTier};
+use mirage_core::control::{DifficultyClass, PrecisionTier};
 use mirage_core::decision::{ActualRouting, ComputeDecision, RoutingPrediction};
 use mirage_core::traits::{BranchPredictor, CognitiveProfiler};
 
 /// Full-depth FP16 every token. No early exit, no precision adaptation.
 /// This is the baseline the adaptive scheduler is measured against.
-pub struct OracleProfiler { pub n_layers: u16 }
+pub struct OracleProfiler {
+    pub n_layers: u16,
+}
 
 impl OracleProfiler {
-    pub fn new(n_layers: u16) -> Self { OracleProfiler { n_layers } }
+    pub fn new(n_layers: u16) -> Self {
+        OracleProfiler { n_layers }
+    }
 }
 
 impl CognitiveProfiler for OracleProfiler {
@@ -39,11 +43,16 @@ impl BranchPredictor for OraclePredictor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use mirage_core::control::TokenKind;
+    use mirage_core::control::{ChainPhase, TokenKind};
     fn ctx() -> TokenContext {
-        TokenContext { token_id: 0, position: 0, recent_logit_margin: 1.0,
-            recent_entropy: 0.2, token_kind: TokenKind::Content,
-            chain_phase: ChainPhase::Middle }
+        TokenContext {
+            token_id: 0,
+            position: 0,
+            recent_logit_margin: 1.0,
+            recent_entropy: 0.2,
+            token_kind: TokenKind::Content,
+            chain_phase: ChainPhase::Middle,
+        }
     }
     #[test]
     fn oracle_profiler_returns_full_depth_fp16() {
@@ -55,7 +64,10 @@ mod tests {
     #[test]
     fn oracle_predictor_is_empty() {
         let p = OraclePredictor;
-        let pred = p.predict(&RoutingContext { position: 5, recent_experts: vec![1, 2, 3] });
+        let pred = p.predict(&RoutingContext {
+            position: 5,
+            recent_experts: vec![1, 2, 3],
+        });
         assert!(pred.experts_per_moe_layer.is_empty());
         assert_eq!(pred.likely_exit_layer, 0);
     }

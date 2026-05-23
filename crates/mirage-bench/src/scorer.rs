@@ -22,12 +22,18 @@ pub trait Scorer {
 pub struct PlanDivergence;
 
 impl Scorer for PlanDivergence {
-    fn name(&self) -> &'static str { "plan-divergence" }
+    fn name(&self) -> &'static str {
+        "plan-divergence"
+    }
 
     fn score(&self, oracle: &[TokenTrace], adaptive: &[TokenTrace]) -> Score {
         let n = oracle.len().min(adaptive.len());
         if n == 0 {
-            return Score { units: "fraction".to_string(), value: 0.0, samples: 0 };
+            return Score {
+                units: "fraction".to_string(),
+                value: 0.0,
+                samples: 0,
+            };
         }
         let mut mismatches = 0usize;
         for (o, a) in oracle.iter().zip(adaptive.iter()).take(n) {
@@ -38,7 +44,9 @@ impl Scorer for PlanDivergence {
             let diff = o.profiler_decision.difficulty != a.profiler_decision.difficulty
                 || o.profiler_decision.target_depth != a.profiler_decision.target_depth
                 || o.precision_plan != a.precision_plan;
-            if diff { mismatches += 1; }
+            if diff {
+                mismatches += 1;
+            }
         }
         Score {
             units: "fraction".to_string(),

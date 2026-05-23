@@ -2,9 +2,10 @@
 //! Reasoning-retention CI gate. Runs the GsmToy task through:
 //!   1. the sim-oracle config (full-depth FP16, no adaptivity)
 //!   2. the production-default adaptive config (HeuristicProfiler + NgramBranchPredictor)
+//!
 //! and prints a Markdown report. Exits with code 1 if plan-divergence
 //! exceeds the threshold (default 2.0 %).
-use mirage_bench::oracle::{OracleProfiler, OraclePredictor};
+use mirage_bench::oracle::{OraclePredictor, OracleProfiler};
 use mirage_bench::render::to_markdown;
 use mirage_bench::report::BenchReport;
 use mirage_bench::runner::BenchRunner;
@@ -23,7 +24,11 @@ fn main() {
     let samples = task.samples();
     let runner = BenchRunner::new(shape, 12_000, 99, 42);
 
-    let oracle = runner.run(OracleProfiler::new(shape.n_layers), OraclePredictor, &samples);
+    let oracle = runner.run(
+        OracleProfiler::new(shape.n_layers),
+        OraclePredictor,
+        &samples,
+    );
     let adaptive = runner.run(
         HeuristicProfiler::new(shape.n_layers),
         NgramBranchPredictor::new(8),
@@ -42,5 +47,8 @@ fn main() {
         );
         std::process::exit(1);
     }
-    eprintln!("OK: plan-divergence {:.4} within gate {:.4}", div.value, THRESHOLD);
+    eprintln!(
+        "OK: plan-divergence {:.4} within gate {:.4}",
+        div.value, THRESHOLD
+    );
 }

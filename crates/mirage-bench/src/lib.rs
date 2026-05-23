@@ -2,10 +2,10 @@
 //! mirage-bench — measures the moat. Plan-divergence scoring, telemetry
 //! aggregation, and the reasoning-retention CI gate.
 
+pub mod oracle;
+pub mod render;
+pub mod report;
+pub mod runner;
+pub mod scorer;
 pub mod task;
 pub mod tasks;
-pub mod scorer;
-pub mod oracle;
-pub mod runner;
-pub mod report;
-pub mod render;

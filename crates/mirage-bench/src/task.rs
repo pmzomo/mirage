@@ -31,8 +31,12 @@ mod tests {
     use super::*;
     struct Empty;
     impl Task for Empty {
-        fn name(&self) -> &'static str { "empty" }
-        fn samples(&self) -> Vec<BenchSample> { vec![] }
+        fn name(&self) -> &'static str {
+            "empty"
+        }
+        fn samples(&self) -> Vec<BenchSample> {
+            vec![]
+        }
     }
     #[test]
     fn task_trait_is_object_safe() {

@@ -16,7 +16,12 @@ pub struct BenchRunner {
 
 impl BenchRunner {
     pub fn new(shape: ModelShape, vram_budget_mb: u32, run_id: u128, model_id: u64) -> Self {
-        BenchRunner { shape, vram_budget_mb, run_id, model_id }
+        BenchRunner {
+            shape,
+            vram_budget_mb,
+            run_id,
+            model_id,
+        }
     }
 
     pub fn run<P: CognitiveProfiler, B: BranchPredictor>(
@@ -42,7 +47,10 @@ impl BenchRunner {
                     token_kind: step.token_kind,
                     chain_phase: step.chain_phase,
                 };
-                let rctx = RoutingContext { position, recent_experts: recent.clone() };
+                let rctx = RoutingContext {
+                    position,
+                    recent_experts: recent.clone(),
+                };
                 let tr = sched.step(&tctx, &rctx, &self.shape, &mut backend, &fb);
                 recent = tr.actual_experts.clone();
                 position += 1;
@@ -56,10 +64,10 @@ impl BenchRunner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tasks::gsm_toy::GsmToy;
     use crate::task::Task;
-    use mirage_profiler::HeuristicProfiler;
+    use crate::tasks::gsm_toy::GsmToy;
     use mirage_predictor::NgramBranchPredictor;
+    use mirage_profiler::HeuristicProfiler;
     use mirage_telemetry::validate;
 
     #[test]
@@ -74,6 +82,8 @@ mod tests {
             &samples,
         );
         assert_eq!(traces.len(), expected);
-        for t in &traces { assert!(validate(t).is_ok()); }
+        for t in &traces {
+            assert!(validate(t).is_ok());
+        }
     }
 }
