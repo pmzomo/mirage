@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 use mirage_telemetry::TokenTrace;
+use serde::{Deserialize, Serialize};
 
 /// Output of a scoring pass. `value` is in [0, 1] where 0 = identical
 /// and 1 = total divergence. `units` describes what was measured.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Score {
-    pub units: &'static str,
+    pub units: String,
     pub value: f64,
     pub samples: usize,
 }
@@ -26,7 +27,7 @@ impl Scorer for PlanDivergence {
     fn score(&self, oracle: &[TokenTrace], adaptive: &[TokenTrace]) -> Score {
         let n = oracle.len().min(adaptive.len());
         if n == 0 {
-            return Score { units: "fraction", value: 0.0, samples: 0 };
+            return Score { units: "fraction".to_string(), value: 0.0, samples: 0 };
         }
         let mut mismatches = 0usize;
         for (o, a) in oracle.iter().zip(adaptive.iter()).take(n) {
@@ -40,7 +41,7 @@ impl Scorer for PlanDivergence {
             if diff { mismatches += 1; }
         }
         Score {
-            units: "fraction",
+            units: "fraction".to_string(),
             value: mismatches as f64 / n as f64,
             samples: n,
         }
