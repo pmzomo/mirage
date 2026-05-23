@@ -8,3 +8,4 @@ pub mod scorer;
 pub mod oracle;
 pub mod runner;
 pub mod report;
+pub mod render;
