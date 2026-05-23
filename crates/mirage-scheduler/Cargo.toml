@@ -1,0 +1,15 @@
+[package]
+name = "mirage-scheduler"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+mirage-core = { path = "../mirage-core" }
+mirage-profiler = { path = "../mirage-profiler" }
+mirage-predictor = { path = "../mirage-predictor" }
+mirage-telemetry = { path = "../mirage-telemetry" }
+
+[dev-dependencies]
+mirage-sim = { path = "../mirage-sim" }
+proptest.workspace = true
