@@ -1,0 +1,14 @@
+# Private design + planning docs — never push
+docs/
+mirage-docs-backup/
+
+# Build artifacts
+target/
+Cargo.lock
+*.pdb
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
